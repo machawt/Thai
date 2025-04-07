@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบฝึกหัดสำนวนไทย</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f0f4f8;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2b6cb0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .exercise-item {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f7fafc;
+        }
+
+        .proverb {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        select {
+            padding: 6px;
+            border: 2px solid #cbd5e0;
+            border-radius: 4px;
+            font-family: 'Noto Sans Thai', sans-serif;
+            min-width: 120px;
+        }
+
+        button {
+            background-color: #4299e1;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #3182ce;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .correct { color: #38a169; }
+        .incorrect { color: #e53e3e; }
+
+        #score {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #ebf8ff;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>แบบฝึกหัดเลือกสำนวนไทย</h1>
+        <div id="exercises"></div>
+        <div id="score"></div>
+    </div>
+
+    <script>
+        const proverbs = [
+            {
+                text: "____ ตื่นตูม",
+                answer: "กระต่าย",
+                meaning: "ตื่นตกใจง่ายโดยใช่เหตุ"
+            },
+            {
+                text: "____ อย่ากระดิกหาง",
+                answer: "เสือ",
+                meaning: "อย่าทำอะไรให้ผู้ใหญ่เห็น"
+            },
+            {
+                text: "____ คาบพริก",
+                answer: "สุนัข",
+                meaning: "ทำท่าดุร้ายแต่จริงๆ ไม่กล้า"
+            },
+            {
+                text: "น้ำขึ้นให้รีบ____",
+                answer: "ตัก",
+                meaning: "คว้าโอกาสเมื่อมีโอกาส"
+            },
+            {
+                text: "____ ว่ายน้ำ",
+                answer: "ปั้น",
+                meaning: "ทำสิ่งที่เกินความสามารถ"
+            },
+            {
+                text: "____ หนีเสือปะจระเข้",
+                answer: "หนี",
+                meaning: "หลบปัญหาเจอปัญหาที่ใหญ่กว่า"
+            },
+            {
+                text: "____ ขี้ไม่ร้อน",
+                answer: "ชัก",
+                meaning: "ไม่รู้สึกรู้สา"
+            },
+            {
+                text: "____ อยู่ในมือ",
+                answer: "นก",
+                meaning: "สิ่งที่ได้มาแล้วควรรักษาไว้"
+            },
+            {
+                text: "____ ไม่ดูดายเหง้า",
+                answer: "ไผ่",
+                meaning: "ไม่ลืมบุญคุณ"
+            },
+            {
+                text: "____ กลางทะเล",
+                answer: "หาปลา",
+                meaning: "ทำงานที่เสี่ยงอันตราย"
+            }
+        ];
+
+        let score = 0;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function generateChoices(currentIndex) {
+            const correctAnswer = proverbs[currentIndex].answer;
+            const otherAnswers = proverbs
+                .filter((_, index) => index !== currentIndex)
+                .map(p => p.answer);
+            const shuffledOthers = shuffleArray([...otherAnswers]);
+            const choices = [correctAnswer, ...shuffledOthers.slice(0, 3)];
+            return shuffleArray(choices);
+        }
+
+        function generateExercises() {
+            const container = document.getElementById('exercises');
+            
+            proverbs.forEach((proverb, index) => {
+                const choices = generateChoices(index);
+                
+                const exerciseDiv = document.createElement('div');
+                exerciseDiv.className = 'exercise-item';
+                exerciseDiv.innerHTML = `
+                    <div class="proverb">${index + 1}. ${proverb.text.replace('____', `
+                        <select id="ans${index}">
+                            <option value="">-- เลือก --</option>
+                            ${choices.map(choice => `
+                                <option value="${choice}">${choice}</option>
+                            `).join('')}
+                        </select>
+                    `)}</div>
+                    <button onclick="checkAnswer(${index})">ตรวจคำตอบ</button>
+                    <div id="fb${index}" class="feedback"></div>
+                    <div id="meaning${index}" style="display:none; color: #718096; margin-top: 5px;">ความหมาย: ${proverb.meaning}</div>
+                `;
+                container.appendChild(exerciseDiv);
+            });
+        }
+
+        function checkAnswer(index) {
+            const selectElement = document.getElementById(`ans${index}`);
+            const userAnswer = selectElement.value;
+            const feedback = document.getElementById(`fb${index}`);
+            const meaning = document.getElementById(`meaning${index}`);
+            
+            if(userAnswer === proverbs[index].answer) {
+                feedback.textContent = "ถูกต้อง! ✔";
+                feedback.className = 'feedback correct';
+                score++;
+            } else {
+                feedback.textContent = `ไม่ถูกต้อง ❌ (คำตอบที่ถูกต้อง: ${proverbs[index].answer})`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            meaning.style.display = 'block';
+            updateScore();
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerHTML = `
+                คะแนน: ${score}/${proverbs.length}
+                <br><button onclick="resetExercise()" style="margin-top:10px;">เริ่มใหม่</button>
+            `;
+        }
+
+        function resetExercise() {
+            score = 0;
+            document.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+            document.querySelectorAll('.feedback').forEach(fb => {
+                fb.textContent = '';
+                fb.className = 'feedback';
+            });
+            document.querySelectorAll('[id^="meaning"]').forEach(div => div.style.display = 'none');
+            updateScore();
+        }
+
+        window.onload = generateExercises;
+    </script>
+</body>
+</html>
