@@ -159,9 +159,145 @@
         <div id="score"></div>
     </div>
 
-    <!-- Keep the JavaScript from previous version with same functionality -->
     <script>
-        // ... (Keep the JavaScript code from previous version unchanged) ...
+        const proverbs = [
+            {
+                text: "____ ตื่นตูม",
+                answer: "กระต่าย",
+                meaning: "ตื่นตกใจง่ายโดยใช่เหตุ"
+            },
+            {
+                text: "____ อย่ากระดิกหาง",
+                answer: "เสือ",
+                meaning: "อย่าทำอะไรให้ผู้ใหญ่เห็น"
+            },
+            {
+                text: "____ คาบพริก",
+                answer: "สุนัข",
+                meaning: "ทำท่าดุร้ายแต่จริงๆ ไม่กล้า"
+            },
+            {
+                text: "น้ำขึ้นให้รีบ____",
+                answer: "ตัก",
+                meaning: "คว้าโอกาสเมื่อมีโอกาส"
+            },
+            {
+                text: "____ ว่ายน้ำ",
+                answer: "ปั้น",
+                meaning: "ทำสิ่งที่เกินความสามารถ"
+            },
+            {
+                text: "____ หนีเสือปะจระเข้",
+                answer: "หนี",
+                meaning: "หลบปัญหาเจอปัญหาที่ใหญ่กว่า"
+            },
+            {
+                text: "____ ขี้ไม่ร้อน",
+                answer: "ชัก",
+                meaning: "ไม่รู้สึกรู้สา"
+            },
+            {
+                text: "____ อยู่ในมือ",
+                answer: "นก",
+                meaning: "สิ่งที่ได้มาแล้วควรรักษาไว้"
+            },
+            {
+                text: "____ ไม่ดูดายเหง้า",
+                answer: "ไผ่",
+                meaning: "ไม่ลืมบุญคุณ"
+            },
+            {
+                text: "____ กลางทะเล",
+                answer: "หาปลา",
+                meaning: "ทำงานที่เสี่ยงอันตราย"
+            }
+        ];
+
+        let score = 0;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function generateChoices(currentIndex) {
+            const correctAnswer = proverbs[currentIndex].answer;
+            const otherAnswers = proverbs
+                .filter((_, index) => index !== currentIndex)
+                .map(p => p.answer);
+            const shuffledOthers = shuffleArray([...otherAnswers]);
+            const choices = [correctAnswer, ...shuffledOthers.slice(0, 3)];
+            return shuffleArray(choices);
+        }
+
+        function generateExercises() {
+            const container = document.getElementById('exercises');
+            
+            proverbs.forEach((proverb, index) => {
+                const choices = generateChoices(index);
+                
+                const exerciseDiv = document.createElement('div');
+                exerciseDiv.className = 'exercise-item';
+                exerciseDiv.innerHTML = `
+                    <div class="proverb">${index + 1}. ${proverb.text.replace('____', `
+                        <select id="ans${index}">
+                            <option value="">-- เลือก --</option>
+                            ${choices.map(choice => `
+                                <option value="${choice}">${choice}</option>
+                            `).join('')}
+                        </select>
+                    `)}</div>
+                    <button onclick="checkAnswer(${index})">ตรวจคำตอบ</button>
+                    <div id="fb${index}" class="feedback"></div>
+                    <div id="meaning${index}" style="display:none; color: #718096; margin-top: 5px;">ความหมาย: ${proverb.meaning}</div>
+                `;
+                container.appendChild(exerciseDiv);
+            });
+        }
+
+        function checkAnswer(index) {
+            const selectElement = document.getElementById(`ans${index}`);
+            const userAnswer = selectElement.value;
+            const feedback = document.getElementById(`fb${index}`);
+            const meaning = document.getElementById(`meaning${index}`);
+            
+            if(userAnswer === proverbs[index].answer) {
+                feedback.textContent = "ถูกต้อง! ✔";
+                feedback.className = 'feedback correct';
+                score++;
+            } else {
+                feedback.textContent = `ไม่ถูกต้อง ❌ (คำตอบที่ถูกต้อง: ${proverbs[index].answer})`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            meaning.style.display = 'block';
+            updateScore();
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerHTML = `
+                คะแนน: ${score}/${proverbs.length}
+                <br><button onclick="resetExercise()" style="margin-top:10px;">เริ่มใหม่</button>
+            `;
+        }
+
+        function resetExercise() {
+            score = 0;
+            document.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+            document.querySelectorAll('.feedback').forEach(fb => {
+                fb.textContent = '';
+                fb.className = 'feedback';
+            });
+            document.querySelectorAll('[id^="meaning"]').forEach(div => div.style.display = 'none');
+            updateScore();
+        }
+
+        window.onload = generateExercises;
     </script>
 </body>
 </html>
